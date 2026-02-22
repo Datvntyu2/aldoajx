@@ -1,5 +1,6 @@
-# 🔓 Vietnam Link Bypass Tool
-# Developer: datcn
+# 🔓 Tool bypass link vietnam
+
+# make by datcn
 
 ====================================
 
@@ -9,8 +10,8 @@ Hoạt động bằng cách chạy script trực tiếp trong trình duyệt.
 
 ====================================
 
-✅ Trạng thái:
-Tất cả hệ thống đang hoạt động ổn định
+✅ Trạng thái: Tất cả hệ thống đang hoạt động ổn định
+
 
 ====================================
 
