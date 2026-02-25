@@ -19,34 +19,43 @@
         console.log(`%c[datcn] ${icons[type]} ${msg}`, `${styles[type]} font-weight: bold; padding: 6px 12px; border-radius: 6px; font-family: 'Segoe UI', sans-serif; font-size: 13px;`);
     };
     
-    let capturedPayload = null;
-    let isProcessing = false;
-    
     // Hook fetch
     const originalFetch = window.fetch;
     window.fetch = async function(url, options = {}) {
         // Bắt request POST đến /api/campaign/get
         if (url.includes('/api/campaign/get') && options.method === 'POST') {
-            if (isProcessing) return originalFetch.apply(this, arguments);
-            
-            isProcessing = true;
             log('Bắt được request GET', 'info');
             
-            // Lưu body gốc
-            capturedPayload = options.body;
+            // Clone body trước khi gọi fetch (vì body chỉ đọc được 1 lần)
+            let capturedPayload = null;
+            if (options.body) {
+                capturedPayload = typeof options.body === 'string' 
+                    ? options.body 
+                    : JSON.stringify(options.body);
+            }
             
-            // Gọi complete NGAY LẬP TỨC, không đợi cooldown
-            completeTask();
-            
-            return originalFetch.apply(this, arguments);
+            try {
+                // Gọi fetch gốc trước
+                const response = await originalFetch.apply(this, arguments);
+                
+                // Sau khi có response, gọi complete ngay lập tức
+                if (capturedPayload) {
+                    completeTask(capturedPayload);
+                }
+                
+                return response;
+            } catch (error) {
+                log('Fetch gốc lỗi: ' + error.message, 'error');
+                throw error;
+            }
         }
         
         return originalFetch.apply(this, arguments);
     };
     
     // Complete task ngay lập tức
-    async function completeTask() {
-        if (!capturedPayload) {
+    async function completeTask(payloadString) {
+        if (!payloadString) {
             log('Không có payload!', 'error');
             return;
         }
@@ -55,7 +64,7 @@
         
         try {
             // Parse và cập nhật timestamp
-            const payload = JSON.parse(capturedPayload);
+            const payload = JSON.parse(payloadString);
             payload.timestamp = Date.now();
             
             const res = await fetch(API_COMPLETE, {
@@ -77,13 +86,15 @@
             }
         } catch(e) {
             log('Lỗi: ' + e.message, 'error');
-        } finally {
-            isProcessing = false;
         }
     }
     
     // Hiển thị thành công
     function showSuccess(code, message) {
+        // Xóa popup cũ nếu có
+        const oldPopup = document.getElementById('datcn-popup');
+        if (oldPopup) oldPopup.remove();
+        
         const div = document.createElement('div');
         div.id = 'datcn-popup';
         div.innerHTML = `
@@ -135,11 +146,7 @@
                     font-family: 'Courier New', monospace;
                     animation: datcnGlow 1.5s infinite;
                 ">${code}</div>
-                <button onclick="
-                    navigator.clipboard.writeText('${code}');
-                    this.innerHTML='✅ ĐÃ COPY';
-                    this.style.background='linear-gradient(90deg, #00aa44, #00cc66)';
-                " style="
+                <button id="datcn-copy-btn" style="
                     padding: 15px 50px;
                     background: linear-gradient(90deg, #FF6600, #FF9900);
                     color: #fff;
@@ -163,9 +170,22 @@
         `;
         document.body.appendChild(div);
         
+        // Thêm event listener cho button thay vì inline onclick
+        document.getElementById('datcn-copy-btn').addEventListener('click', function() {
+            navigator.clipboard.writeText(code).then(() => {
+                this.innerHTML = '✅ ĐÃ COPY';
+                this.style.background = 'linear-gradient(90deg, #00aa44, #00cc66)';
+            }).catch(err => {
+                log('Copy failed: ' + err, 'error');
+            });
+        });
+        
         // Auto copy
-        navigator.clipboard.writeText(code);
-        log('Đã auto-copy: ' + code, 'done');
+        navigator.clipboard.writeText(code).then(() => {
+            log('Đã auto-copy: ' + code, 'done');
+        }).catch(() => {
+            log('Auto-copy failed (có thể do permission)', 'error');
+        });
     }
     
     log('Script sẵn sàng - Chờ request GET để instant complete...', 'info');
