@@ -5,7 +5,7 @@
 
   // ===== CONFIG =====
   const SPEED = 20;      // x20
-  const WAIT_SEC = 29;   // countdown 30s
+  const WAIT_SEC = 30;   // countdown 30s
   const MIN_DELAY = 0;   // ms
   // ==================
 
