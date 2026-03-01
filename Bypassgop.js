@@ -10,7 +10,7 @@
     
     // Hàm tăng tốc độ timeout/interval lên 100 lần
     (function speedUpTimers() {
-        console.log('%c[DatCN] Giám sát viên đang được triển khai... | Script by Datcn', 'color: #a955ff; font-weight: bold');
+        console.log('%c[datcn] đã tăng tốc bypass| Script by Datcn', 'color: #a955ff; font-weight: bold');
         
         const speedMultiplier = 100;
         
@@ -40,8 +40,8 @@
                 </svg>
             </div>
             <div class="datcn-content">
-                <div class="datcn-title">DatCN Đã Kích Hoạt</div>
-                <div class="datcn-message">Cảm ơn bạn đã sử dụng code by DatCN.</div>
+                <div class="datcn-title">datcn Đã Kích Hoạt</div>
+                <div class="datcn-message">Cảm ơn bạn đã sử dụng code by datcn.</div>
                 <div class="datcn-credit" style="font-size: 10px; color: #888; margin-top: 4px; font-style: italic;">Script by Datcn</div>
             </div>
             <div class="datcn-close" title="Đóng">&times;</div>
@@ -137,7 +137,7 @@
         // Tự động đóng sau 5 giây
         originalSetTimeout(closeNotification, 5000);
         
-        console.log('%c[DatCN] Thông báo đã được hiển thị. | Script by Datcn', 'color: #a955ff; font-weight: bold');
+        console.log('%c[datcn] thông báo đã hiện thị| Script by Datcn', 'color: #a955ff; font-weight: bold');
     }
     
     // Đợi DOM ready rồi tạo thông báo
