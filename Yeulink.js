@@ -216,7 +216,7 @@ javascript:(function(){
         </div>
         <div class="datcn-status" id="datcn-step1">
             <span class="datcn-status-icon">1</span>
-            <strong>Đang tìm nút...</strong>
+            <strong>Đang tìm nút 170x36...</strong>
         </div>
         <div class="datcn-status" id="datcn-step2">
             <span class="datcn-status-icon">2</span>
@@ -232,7 +232,7 @@ javascript:(function(){
         <div class="datcn-result" id="datcn-result">
             <div class="datcn-result-label">🎉 MÃ GIFT CODE</div>
             <div class="datcn-code" id="datcn-code">---</div>
-            <button class="datcn-copy" onclick="document.getElementById('datcn-copybtn').click()">📋 COPY MÃ</button>
+            <button class="datcn-copy" id="datcn-copybtn">📋 COPY MÃ</button>
         </div>
         <div class="datcn-log" id="datcn-log"></div>
         <div class="datcn-footer">⚡ Bypass by DatCN ⚡</div>
@@ -271,20 +271,99 @@ javascript:(function(){
         log('✅ THÀNH CÔNG: ' + code, 'success');
         
         // Auto copy
+        setTimeout(() => {
+            copyToClipboard(code);
+        }, 500);
+    }
+
+    // Copy function
+    function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                log('📋 Đã copy: ' + text, 'success');
+                showCopyNotification(text);
+            }).catch(err => {
+                fallbackCopy(text);
+            });
+        } else {
+            fallbackCopy(text);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        textarea.setSelectionRange(0, 99999);
+        
         try {
-            navigator.clipboard.writeText(code);
-            log('📋 Auto copied!', 'success');
-        } catch(e) {}
+            const successful = document.execCommand('copy');
+            if (successful) {
+                log('📋 Đã copy (fallback): ' + text, 'success');
+                showCopyNotification(text);
+            } else {
+                log('❌ Không thể copy', 'error');
+            }
+        } catch (err) {
+            log('❌ Lỗi copy: ' + err, 'error');
+        }
+        
+        document.body.removeChild(textarea);
+    }
+
+    function showCopyNotification(text) {
+        alert('✅ Đã copy mã: ' + text);
+        
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff8c00, #ff6b35);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            z-index: 1000000;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 0 20px rgba(255,140,0,0.5);
+        `;
+        notification.textContent = '✅ Đã copy: ' + text;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 2000);
+        
+        if (!document.querySelector('#datcn-animations')) {
+            const animStyle = document.createElement('style');
+            animStyle.id = 'datcn-animations';
+            animStyle.textContent = `
+                @keyframes slideUp {
+                    from { bottom: 0; opacity: 0; }
+                    to { bottom: 20px; opacity: 1; }
+                }
+                @keyframes fadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; }
+                }
+            `;
+            document.head.appendChild(animStyle);
+        }
     }
 
     // Copy button handler
-    window.datcnCopy = function() {
+    document.getElementById('datcn-copybtn').addEventListener('click', function() {
         const code = document.getElementById('datcn-code').textContent;
-        navigator.clipboard.writeText(code).then(() => {
-            log('📋 Copied: ' + code, 'success');
-            alert('✅ Đã copy: ' + code);
-        });
-    };
+        if (code && code !== '---') {
+            copyToClipboard(code);
+        }
+    });
 
     // ===== BYPASS LOGIC =====
     log('Khởi động bypass by DatCN...', 'bypass');
@@ -310,7 +389,6 @@ javascript:(function(){
         win.fetch = async function(...args) {
             const [url, opt] = args;
             
-            // Hook request để lấy code
             if (typeof url === 'string' && url.includes('/step') && opt?.body) {
                 try {
                     if (opt.body instanceof FormData) {
@@ -328,7 +406,6 @@ javascript:(function(){
 
             const response = await nativeFetch.apply(this, args);
 
-            // Hook response để lấy token
             if (typeof url === 'string' && url.includes('/step')) {
                 try {
                     const cloned = response.clone();
@@ -345,7 +422,6 @@ javascript:(function(){
             return response;
         };
 
-        // XHR hook
         const xhrOpen = win.XMLHttpRequest.prototype.open;
         win.XMLHttpRequest.prototype.open = function(m, u) {
             this._url = u;
@@ -395,39 +471,78 @@ javascript:(function(){
         });
     }).observe(document.body, { childList: true, subtree: true });
 
-    // Auto click
+    // Auto click - Tìm nút có kích thước 170x36
     function autoClick() {
         setStatus(1);
-        log('🔍 Tìm nút gift...', 'info');
+        log('🔍 Tìm nút 170x36...', 'info');
         
-        const tryClick = () => {
-            const btns = [...document.querySelectorAll('button:not([disabled])')];
-            const btn = btns.find(b => {
-                const text = b.textContent.toLowerCase();
-                const bg = getComputedStyle(b).backgroundColor;
-                return text.includes('nhận') || text.includes('claim') || 
-                       text.includes('gift') || text.includes('lấy') ||
-                       text.includes('mã') || text.includes('code') ||
-                       bg.includes('13, 148') || bg.includes('34, 197') || 
-                       bg.includes('59, 130') || bg.includes('255, 140');
+        const findAndClickButton = () => {
+            // Tìm tất cả elements có thể là button
+            const elements = [...document.querySelectorAll('button, a, div[role="button"], input[type="button"], input[type="submit"], .btn, .button')];
+            
+            // Tìm element có kích thước gần với 170x36
+            const targetButton = elements.find(el => {
+                const rect = el.getBoundingClientRect();
+                const width = Math.round(rect.width);
+                const height = Math.round(rect.height);
+                
+                // Cho phép sai số ±2px
+                const matchWidth = Math.abs(width - 170) <= 2;
+                const matchHeight = Math.abs(height - 36) <= 2;
+                
+                if (matchWidth && matchHeight) {
+                    log(`📐 Tìm thấy element: ${el.tagName} - Kích thước: ${width}x${height}`, 'info');
+                    return true;
+                }
+                return false;
             });
 
-            if (btn) {
-                log(`🖱️ Đã click: "${btn.textContent.trim()}"`, 'bypass');
-                btn.disabled = false;
-                btn.style.pointerEvents = 'auto';
-                btn.click();
+            if (targetButton) {
+                const rect = targetButton.getBoundingClientRect();
+                log(`🖱️ Đã tìm thấy nút 170x36 tại vị trí: ${Math.round(rect.left)},${Math.round(rect.top)}`, 'bypass');
+                
+                // Enable và click
+                targetButton.disabled = false;
+                targetButton.style.pointerEvents = 'auto';
+                targetButton.click();
+                
+                // Click thêm bằng nhiều cách để đảm bảo
+                setTimeout(() => {
+                    targetButton.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+                    targetButton.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+                    targetButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                }, 100);
+                
+                log('✅ Đã click nút 170x36', 'success');
                 return true;
             }
+            
             return false;
         };
 
-        if (!tryClick()) {
-            const obs = new MutationObserver(() => {
-                if (tryClick()) obs.disconnect();
+        // Thử tìm và click ngay
+        if (!findAndClickButton()) {
+            log('⏳ Chưa tìm thấy nút 170x36, đang theo dõi DOM...', 'info');
+            
+            // Theo dõi DOM để tìm nút
+            const observer = new MutationObserver((mutations) => {
+                if (findAndClickButton()) {
+                    observer.disconnect();
+                }
             });
-            obs.observe(document.body, { childList: true, subtree: true });
-            setTimeout(() => obs.disconnect(), 5000);
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            });
+            
+            // Timeout sau 10 giây
+            setTimeout(() => {
+                observer.disconnect();
+                log('⚠️ Hết thời gian tìm nút 170x36', 'error');
+            }, 10000);
         }
     }
 
@@ -439,7 +554,6 @@ javascript:(function(){
 
     function startPolling() {
         let attempts = 0;
-        const maxAttempts = 20;
 
         const iv = setInterval(async () => {
             attempts++;
@@ -471,20 +585,15 @@ javascript:(function(){
                 log(`❌ Lỗi: ${e.message}`, 'error');
             }
 
-            if (attempts >= maxAttempts) {
-                clearInterval(iv);
-                polling = false;
-                log('⛔ Hết lần thử', 'error');
-            }
-
         }, 1000);
 
+        // Timeout 5 phút
         setTimeout(() => {
             if (polling) {
                 clearInterval(iv);
                 polling = false;
-                log('⛔ Timeout', 'error');
+                log('⛔ Timeout sau 5 phút', 'error');
             }
-        }, 30000);
+        }, 300000);
     }
 })();
