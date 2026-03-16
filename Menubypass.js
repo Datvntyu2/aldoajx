@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name         menu tool bypass
 // @namespace    menu gộp bypass by datcn
+// @description  menu bypass by datcn
 // @version      1.0
 // @match        *://*/*
 // @grant        GM_registerMenuCommand
