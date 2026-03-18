@@ -212,7 +212,7 @@ javascript:(function(){
         <button class="datcn-close" onclick="this.parentElement.remove()">×</button>
         <div class="datcn-header">
             <div class="datcn-title">⚡ BYPASS</div>
-            <div class="datcn-subtitle">YeuLink Auto Claim</div>
+            <div class="datcn-subtitle">Taplayma Auto Claim</div>
         </div>
         <div class="datcn-status" id="datcn-step1">
             <span class="datcn-status-icon">1</span>
@@ -269,11 +269,6 @@ javascript:(function(){
         document.getElementById('datcn-result').classList.add('show');
         setStatus(3, false);
         log('✅ THÀNH CÔNG: ' + code, 'success');
-        
-        // Auto copy
-        setTimeout(() => {
-            copyToClipboard(code);
-        }, 500);
     }
 
     // Copy function
