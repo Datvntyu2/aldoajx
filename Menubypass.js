@@ -135,12 +135,12 @@ runTool("Bypass Gộp",
 "https://raw.githubusercontent.com/Datvntyu2/aldoajx/main/Bypassgop.js");
 });
 
-GM_registerMenuCommand("▶ Nhập Mã", function(){
+GM_registerMenuCommand("▶ nhapma", function(){
 runTool("Nhập Mã",
 "https://raw.githubusercontent.com/Datvntyu2/aldoajx/main/Nhapma.js");
 });
 
-GM_registerMenuCommand("▶ Tập Lấy Mã", function(){
+GM_registerMenuCommand("▶ TapLayma", function(){
 runTool("Tập Lấy Mã",
 "https://raw.githubusercontent.com/Datvntyu2/aldoajx/main/Taplayma.js");
 });
@@ -150,7 +150,7 @@ runTool("TrafficTop",
 "https://raw.githubusercontent.com/Datvntyu2/aldoajx/main/Traffictop.js");
 });
 
-GM_registerMenuCommand("▶ YêuLink", function(){
+GM_registerMenuCommand("▶ YeuLink", function(){
 runTool("YêuLink",
 "https://raw.githubusercontent.com/Datvntyu2/aldoajx/main/Yeulink.js");
 });
